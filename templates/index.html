@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sunflower Leaf Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 50px;
+            margin-bottom: 20px;
+        }
+        .box {
+            margin-top: 50px;
+            margin-bottom: 50px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            display: inline-block;
+        }
+        .box img {
+            max-width: 300px;
+            margin-bottom: 10px;
+        }
+        .result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sunflower Leaf Detection</h1>
+    <div class="box">
+        <form id="upload-form" enctype="multipart/form-data" action="/predict" method="POST">
+            <input type="file" name="file" id="image">
+            <br>
+            <button type="submit">Detect</button>
+        </form>
+        <img src="" alt="" id="preview">
+        <div class="result" id="result"></div>
+        <div class="error" id="error"></div>
+    </div>
+    <script>
+        document.getElementById("upload-form").addEventListener("submit", function(event) {
+            event.preventDefault();  // Prevent form submission
+
+            // Reset error messages
+            document.getElementById("error").textContent = "";
+            document.getElementById("result").textContent = "";
+
+            // Get the uploaded image
+            var fileInput = document.getElementById("image");
+            var file = fileInput.files[0];
+            if (!file) {
+                document.getElementById("error").textContent = "Please select an image file.";
+                return;
+            }
+
+            // Create a FormData object to send the image file
+            var formData = new FormData();
+            formData.append("file", file);
+
+            // Send a POST request to the server-side API to make predictions on the image
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/predict");
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Display the predicted image and class
+                    var response = JSON.parse(xhr.responseText);
+                    document.getElementById("preview").src = response.image_path;
+                    document.getElementById("result").textContent = response.prediction;
+                } else {
+                    // Display an error message
+                    document.getElementById("error").textContent = "Error making prediction. Please try again later.";
+                }
+            };
+            xhr.send(formData);
+        });
+    </script>
+</body>
+</html>
